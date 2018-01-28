@@ -64,6 +64,8 @@ pipeline {
     KUBE_CONFORMANCE_IMAGE = 'quay.io/coreos/kube-conformance:v1.8.4_coreos.0'
     TF_VAR_tectonic_aws_region = "${params.aws_region}"
     AWS_REGION = "${params.aws_region}"
+    AWS_SSH = "${params.aws_keypair}"
+    TF_VAR_tectonic_aws_ssh_key = "${params.aws_keypair}"
   }
   options {
     // Individual steps have stricter timeouts. 360 minutes should be never reached.
