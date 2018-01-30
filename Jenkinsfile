@@ -325,6 +325,7 @@ pipeline {
             TF_VAR_tectonic_aws_region = "${params.aws_region}"
             TF_VAR_tectonic_aws_ssh_key = "${params.aws_keypair}"
             TF_VAR_tectonic_base_domain = "${params.aws_base_domain}"
+            TF_VAR_base_domain = "${params.aws_base_domain}"
           }
           steps {
             script {

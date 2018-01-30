@@ -2,7 +2,7 @@
 
 require 'shared_examples/k8s'
 
-DOMAIN = 'tectonic-ci.de'
+DOMAIN = ENV['TF_VAR_tectonic_base_domain']
 
 RSpec.describe 'aws-custom-tls' do
   include_examples('withBuildFolderSetup', '../smoke/aws/vars/aws.tfvars.json')
