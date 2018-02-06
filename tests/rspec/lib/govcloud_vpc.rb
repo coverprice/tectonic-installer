@@ -24,7 +24,6 @@ class GovcloudVPC
     {
       'TF_VAR_vpc_aws_region' => 'us-gov-west-1',
       'TF_VAR_vpc_name' => @name,
-      'TF_VAR_base_domain' => 'tectonic-ci.de',
       'TF_VAR_nginx_username' => 'openvpn',
       'TF_VAR_nginx_password' => @ovpn_password
     }
