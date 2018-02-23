@@ -73,10 +73,9 @@ pipeline {
   agent none
   environment {
     KUBE_CONFORMANCE_IMAGE = 'quay.io/coreos/kube-conformance:v1.8.4_coreos.0'
-    LOGSTASH_BUCKET= "${params.logstash_bucket}"
-    TF_VAR_tectonic_aws_region = "${params.aws_region}"
-    TF_VAR_tectonic_aws_base_domain = "${params.aws_base_domain}"
-    TF_VAR_base_domain = "${params.aws_base_domain}"
+    TF_VAR_tectonic_aws_region = "${params.AWS_REGION}"
+    TF_VAR_tectonic_aws_base_domain = "${params.AWS_BASE_DOMAIN}"
+    TF_VAR_base_domain = "${params.AWS_BASE_DOMAIN}"
   }
   options {
     // Individual steps have stricter timeouts. 360 minutes should be never reached.
@@ -148,17 +147,17 @@ pipeline {
       description: ''
     )
     string(
-      name: 'aws_region',
+      name: 'AWS_REGION',
       defaultValue: 'us-east-1',
       description: 'AWS region to use'
     )
     string(
-      name: 'aws_base_domain',
+      name: 'AWS_BASE_DOMAIN',
       defaultValue: 'tectonic-ci.de',
       description: 'Route53 base domain for Tectonic ingress and API'
     )
     string(
-      name: 'logstash_bucket',
+      name: 'LOGSTASH_BUCKET',
       defaultValue: 'log-analyzer-tectonic-installer',
       description: 'S3 bucket target for logs, to be consumed by Logstash. Leave empty to skip uploading logs.'
     )
@@ -389,7 +388,7 @@ pipeline {
       script {
         node('worker && ec2') {
           forcefullyCleanWorkspace()
-          if (params.logstash_bucket != "") {
+          if (params.LOGSTASH_BUCKET != "") {
             echo "Starting with streaming the logfile to the S3 bucket"
             withDockerContainer(params.builder_image) {
               withCredentials(credsUI) {
@@ -485,7 +484,7 @@ def runRSpecTest(testFilePath, dockerArgs, credentials) {
         reportStatusToGithub((err == null) ? 'success' : 'failure', testFilePath, originalCommitId)
         step([$class: "TapPublisher", testResults: "templogfiles/*", outputTapToConsole: true, planRequired: false])
         archiveArtifacts allowEmptyArchive: true, artifacts: 'bazel-bin/tectonic/build/**/logs/**'
-        if (params.logstash_bucket != "") {
+        if (params.LOGSTASH_BUCKET != "") {
           withDockerContainer(params.builder_image) {
             withCredentials(credsUI) {
               script {
@@ -538,7 +537,7 @@ def runRSpecTestBareMetal(testFilePath, credentials) {
         reportStatusToGithub((err == null) ? 'success' : 'failure', testFilePath, originalCommitId)
         step([$class: "TapPublisher", testResults: "../../templogfiles/*", outputTapToConsole: true, planRequired: false])
         archiveArtifacts allowEmptyArchive: true, artifacts: 'bazel-bin/tectonic/build/**/logs/**'
-        if (params.logstash_bucket != "") {
+        if (params.LOGSTASH_BUCKET != "") {
           withCredentials(credsUI) {
             script {
               try {
