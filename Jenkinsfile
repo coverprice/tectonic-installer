@@ -73,10 +73,10 @@ pipeline {
   agent none
   environment {
     KUBE_CONFORMANCE_IMAGE = 'quay.io/coreos/kube-conformance:v1.8.4_coreos.0'
-    LOGSTASH_BUCKET= params.logstash_bucket
-    TF_VAR_tectonic_aws_region = params.aws_region
-    TF_VAR_tectonic_aws_base_domain = params.aws_base_domain
-    TF_VAR_base_domain = params.aws_base_domain
+    LOGSTASH_BUCKET= "${params.logstash_bucket}"
+    TF_VAR_tectonic_aws_region = "${params.aws_region}"
+    TF_VAR_tectonic_aws_base_domain = "${params.aws_base_domain}"
+    TF_VAR_base_domain = "${params.aws_base_domain}"
   }
   options {
     // Individual steps have stricter timeouts. 360 minutes should be never reached.
@@ -386,23 +386,25 @@ pipeline {
   }
   post {
     always {
-      node('worker && ec2') {
-        forcefullyCleanWorkspace()
-        if (params.logstash_bucket != "") {
-          echo "Starting with streaming the logfile to the S3 bucket"
-          withDockerContainer(params.builder_image) {
-            withCredentials(credsUI) {
-              unstash 'clean-repo'
-              script {
-                try {
-                  sh """#!/bin/bash -xe
-                  export BUILD_RESULT=${currentBuild.currentResult}
-                  ./tests/jenkins-jobs/scripts/log-analyzer-copy.sh jenkins-logs
-                  """
-                } catch (Exception e) {
-                  notifyBuildSlack()
-                } finally {
-                  cleanWs notFailBuild: true
+      script {
+        node('worker && ec2') {
+          forcefullyCleanWorkspace()
+          if (params.logstash_bucket != "") {
+            echo "Starting with streaming the logfile to the S3 bucket"
+            withDockerContainer(params.builder_image) {
+              withCredentials(credsUI) {
+                unstash 'clean-repo'
+                script {
+                  try {
+                    sh """#!/bin/bash -xe
+                    export BUILD_RESULT=${currentBuild.currentResult}
+                    ./tests/jenkins-jobs/scripts/log-analyzer-copy.sh jenkins-logs
+                    """
+                  } catch (Exception e) {
+                    notifyBuildSlack()
+                  } finally {
+                    cleanWs notFailBuild: true
+                  }
                 }
               }
             }
